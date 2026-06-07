@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'">
+    <title>Finance Calculator</title>
+    <style>
+        @font-face{font-family:'Inter';font-style:normal;font-weight:300;font-display:swap;src:url(fonts/inter-300.woff2) format('woff2')}
+        @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/inter-400.woff2) format('woff2')}
+        @font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/inter-500.woff2) format('woff2')}
+        @font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/inter-600.woff2) format('woff2')}
+        @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:300;font-display:swap;src:url(fonts/jbm-300.woff2) format('woff2')}
+        @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/jbm-400.woff2) format('woff2')}
+        @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/jbm-500.woff2) format('woff2')}
+
+        :root {
+            --bg: #f0f2f5; --card: #fff; --ink: #1d1d1f; --muted: #86868b; --dim: #c7c7cc;
+            --accent: #0071e3; --green: #16a34a; --red: #dc2626; --orange: #ea580c;
+            --border: rgba(0,0,0,0.05);
+            --mono: 'JetBrains Mono', monospace; --sans: 'Inter', -apple-system, sans-serif;
+            --shadow: 0 2px 12px rgba(0,0,0,0.06); --radius: 16px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+        .wrap { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+        h1 { font-size: 24px; font-weight: 600; margin-bottom: 6px; }
+        .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+        /* ── Tabs ── */
+        .tabs { display: flex; gap: 4px; background: rgba(0,0,0,0.03); border-radius: 12px; padding: 4px; margin-bottom: 24px; overflow-x: auto; }
+        .tab { padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border: none; background: none; white-space: nowrap; transition: all 0.2s; }
+        .tab:hover { color: var(--ink); }
+        .tab.active { background: var(--card); color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.08); font-weight: 600; }
+
+        /* ── Panel ── */
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 28px; margin-bottom: 20px; }
+
+        /* ── Form ── */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .grid.tri { grid-template-columns: 1fr 1fr 1fr; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field.full { grid-column: 1 / -1; }
+        label { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.3px; }
+        input, select { font-family: var(--mono); font-size: 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: #f8f9fa; color: var(--ink); outline: none; transition: border 0.2s; }
+        input:focus, select:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(0,113,227,0.07); }
+        select { cursor: pointer; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: #0062c4; }
+        .actions { margin-top: 20px; display: flex; gap: 10px; }
+
+        /* ── Results ── */
+        .results { display: none; margin-top: 24px; }
+        .results.show { display: block; }
+        .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .result-card { background: #f8f9fa; border-radius: 12px; padding: 16px; text-align: center; }
+        .result-card.highlight { background: linear-gradient(135deg, #e8f4fd, #f0fdf4); border: 1px solid rgba(0,113,227,0.1); }
+        .result-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+        .result-value { font-family: var(--mono); font-size: 24px; font-weight: 500; color: var(--ink); }
+        .result-value.green { color: var(--green); }
+        .result-value.accent { color: var(--accent); }
+
+        /* ── Chart ── */
+        .chart-wrap { margin-top: 20px; position: relative; }
+        .chart-bar-bg { display: flex; align-items: flex-end; gap: 2px; height: 140px; padding: 0 4px; }
+        .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+        .chart-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.4s ease; min-height: 2px; }
+        .chart-bar.principal { background: var(--accent); opacity: 0.3; }
+        .chart-bar.interest { background: var(--accent); }
+        .chart-label { font-size: 9px; color: var(--dim); font-family: var(--mono); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-align: center; }
+        .chart-legend { display: flex; gap: 16px; justify-content: center; margin-top: 10px; font-size: 11px; color: var(--muted); }
+        .chart-legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+        .chart-legend .l1::before { background: var(--accent); opacity: 0.3; }
+        .chart-legend .l2::before { background: var(--accent); }
+
+        /* ── Rule72 ── */
+        .r72-result { font-family: var(--mono); font-size: 48px; font-weight: 300; color: var(--accent); text-align: center; padding: 24px; }
+        .r72-label { font-size: 13px; color: var(--muted); text-align: center; margin-top: -8px; margin-bottom: 20px; }
+
+        /* ── Table ── */
+        .tbl-wrap { max-height: 320px; overflow-y: auto; margin-top: 16px; border-radius: 10px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); background: #f8f9fa; padding: 10px 12px; text-align: right; position: sticky; top: 0; }
+        th:first-child { text-align: center; }
+        td { padding: 8px 12px; text-align: right; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 12px; }
+        td:first-child { text-align: center; color: var(--muted); }
+        tr:hover td { background: #f8f9fa; }
+
+        .footnote { font-size: 11px; color: var(--dim); margin-top: 16px; line-height: 1.6; }
+
+        @media (max-width: 640px) {
+            .grid { grid-template-columns: 1fr; }
+            .grid.tri { grid-template-columns: 1fr; }
+            .result-grid { grid-template-columns: 1fr 1fr; }
+            .tabs { gap: 2px; }
+            .tab { padding: 8px 12px; font-size: 12px; }
+            .wrap { padding: 16px 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <h1>Finance Calculator</h1>
+    <p class="subtitle">Investment growth, compound interest, loans & retirement planning</p>
+
+    <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="ci">Compound Interest</button>
+        <button class="tab" data-tab="dca">DCA / SIP</button>
+        <button class="tab" data-tab="loan">Loan</button>
+        <button class="tab" data-tab="retire">Retirement</button>
+        <button class="tab" data-tab="r72">Rule of 72</button>
+    </div>
+
+    <!-- ════ Compound Interest ════ -->
+    <div class="panel active" id="p-ci">
+        <div class="card">
+            <div class="grid">
+                <div class="field"><label>Principal ($)</label><input type="text" id="ci-principal" value="10000" inputmode="decimal"></div>
+                <div class="field"><label>Annual Rate (%)</label><input type="text" id="ci-rate" value="8" inputmode="decimal"></div>
+                <div class="field"><label>Years</label><input type="text" id="ci-years" value="10" inputmode="numeric"></div>
+                <div class="field"><label>Compounding</label>
+                    <select id="ci-freq"><option value="1">Annually</option><option value="2">Semi-annually</option><option value="4">Quarterly</option><option value="12" selected>Monthly</option><option value="365">Daily</option></select>
+                </div>
+            </div>
+            <div class="actions"><button class="btn btn-primary" onclick="calcCI()">Calculate</button></div>
+            <div class="results" id="ci-result">
+                <div class="result-grid">
+                    <div class="result-card highlight"><div class="result-label">Final Amount</div><div class="result-value accent" id="ci-final"></div></div>
+                    <div class="result-card"><div class="result-label">Total Interest</div><div class="result-value green" id="ci-interest"></div></div>
+                    <div class="result-card"><div class="result-label">Effective Rate</div><div class="result-value" id="ci-eff"></div></div>
+                </div>
+                <div class="chart-wrap"><div class="chart-bar-bg" id="ci-chart"></div><div class="chart-legend"><span class="l1">Principal</span><span class="l2">Interest</span></div></div>
+                <div class="tbl-wrap"><table><thead><tr><th>Year</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead><tbody id="ci-tbody"></tbody></table></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ DCA / SIP ════ -->
+    <div class="panel" id="p-dca">
+        <div class="card">
+            <div class="grid tri">
+                <div class="field"><label>Initial Amount ($)</label><input type="text" id="dca-init" value="5000" inputmode="decimal"></div>
+                <div class="field"><label>Monthly Contribution ($)</label><input type="text" id="dca-monthly" value="500" inputmode="decimal"></div>
+                <div class="field"><label>Annual Rate (%)</label><input type="text" id="dca-rate" value="8" inputmode="decimal"></div>
+                <div class="field"><label>Years</label><input type="text" id="dca-years" value="20" inputmode="numeric"></div>
+                <div class="field"><label>Annual Increase (%)</label><input type="text" id="dca-stepup" value="0" inputmode="decimal"></div>
+                <div class="field"><label>Inflation (%)</label><input type="text" id="dca-inflation" value="0" inputmode="decimal"></div>
+            </div>
+            <div class="actions"><button class="btn btn-primary" onclick="calcDCA()">Calculate</button></div>
+            <div class="results" id="dca-result">
+                <div class="result-grid">
+                    <div class="result-card highlight"><div class="result-label">Final Value</div><div class="result-value accent" id="dca-final"></div></div>
+                    <div class="result-card"><div class="result-label">Total Invested</div><div class="result-value" id="dca-invested"></div></div>
+                    <div class="result-card"><div class="result-label">Total Returns</div><div class="result-value green" id="dca-returns"></div></div>
+                    <div class="result-card"><div class="result-label">Real Value (adj.)</div><div class="result-value" id="dca-real"></div></div>
+                </div>
+                <div class="chart-wrap"><div class="chart-bar-bg" id="dca-chart"></div><div class="chart-legend"><span class="l1">Invested</span><span class="l2">Returns</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ Loan ════ -->
+    <div class="panel" id="p-loan">
+        <div class="card">
+            <div class="grid tri">
+                <div class="field"><label>Loan Amount ($)</label><input type="text" id="loan-amt" value="300000" inputmode="decimal"></div>
+                <div class="field"><label>Annual Rate (%)</label><input type="text" id="loan-rate" value="4.5" inputmode="decimal"></div>
+                <div class="field"><label>Term (Years)</label><input type="text" id="loan-years" value="30" inputmode="numeric"></div>
+            </div>
+            <div class="actions"><button class="btn btn-primary" onclick="calcLoan()">Calculate</button></div>
+            <div class="results" id="loan-result">
+                <div class="result-grid">
+                    <div class="result-card highlight"><div class="result-label">Monthly Payment</div><div class="result-value accent" id="loan-monthly"></div></div>
+                    <div class="result-card"><div class="result-label">Total Payment</div><div class="result-value" id="loan-total"></div></div>
+                    <div class="result-card"><div class="result-label">Total Interest</div><div class="result-value" style="color:var(--red)" id="loan-interest"></div></div>
+                    <div class="result-card"><div class="result-label">Interest Ratio</div><div class="result-value" id="loan-ratio"></div></div>
+                </div>
+                <div class="chart-wrap"><div class="chart-bar-bg" id="loan-chart"></div><div class="chart-legend"><span class="l1">Principal</span><span class="l2" style="color:var(--red)">Interest</span></div></div>
+                <p class="footnote">* Equal monthly installments (amortized). Actual payments may vary by lender.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ Retirement ════ -->
+    <div class="panel" id="p-retire">
+        <div class="card">
+            <div class="grid">
+                <div class="field"><label>Current Age</label><input type="text" id="ret-age" value="30" inputmode="numeric"></div>
+                <div class="field"><label>Retirement Age</label><input type="text" id="ret-retage" value="60" inputmode="numeric"></div>
+                <div class="field"><label>Current Savings ($)</label><input type="text" id="ret-savings" value="50000" inputmode="decimal"></div>
+                <div class="field"><label>Monthly Contribution ($)</label><input type="text" id="ret-monthly" value="1000" inputmode="decimal"></div>
+                <div class="field"><label>Expected Return (%)</label><input type="text" id="ret-rate" value="7" inputmode="decimal"></div>
+                <div class="field"><label>Inflation (%)</label><input type="text" id="ret-inflation" value="3" inputmode="decimal"></div>
+                <div class="field"><label>Monthly Spending in Retirement ($)</label><input type="text" id="ret-spending" value="3000" inputmode="decimal"></div>
+                <div class="field"><label>Years in Retirement</label><input type="text" id="ret-yrs" value="30" inputmode="numeric"></div>
+            </div>
+            <div class="actions"><button class="btn btn-primary" onclick="calcRetire()">Calculate</button></div>
+            <div class="results" id="retire-result">
+                <div class="result-grid">
+                    <div class="result-card highlight"><div class="result-label">Retirement Fund</div><div class="result-value accent" id="ret-fund"></div></div>
+                    <div class="result-card"><div class="result-label">Fund (Today's $)</div><div class="result-value" id="ret-real"></div></div>
+                    <div class="result-card"><div class="result-label">Required Fund</div><div class="result-value" style="color:var(--orange)" id="ret-need"></div></div>
+                    <div class="result-card"><div class="result-label">Status</div><div class="result-value" id="ret-status"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ Rule of 72 ════ -->
+    <div class="panel" id="p-r72">
+        <div class="card">
+            <div class="grid">
+                <div class="field"><label>Annual Return (%)</label><input type="text" id="r72-rate" value="8" inputmode="decimal"></div>
+                <div class="field"></div>
+            </div>
+            <div class="actions"><button class="btn btn-primary" onclick="calcR72()">Calculate</button></div>
+            <div class="results" id="r72-result">
+                <div class="r72-result" id="r72-years"></div>
+                <div class="r72-label">years to double your money</div>
+                <div class="result-grid" style="margin-top:16px">
+                    <div class="result-card"><div class="result-label">Exact (log formula)</div><div class="result-value" id="r72-exact"></div></div>
+                    <div class="result-card"><div class="result-label">Doubling Factor</div><div class="result-value accent">2×</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    // ── Helpers ──
+    function $(id) { return document.getElementById(id); }
+    function num(id) { return parseFloat($(id).value.replace(/,/g, '')) || 0; }
+    function fmt(n) { return n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+    function fmtK(n) { return n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(0)+'K' : fmt(n); }
+
+    // ── Tabs ──
+    document.querySelectorAll('.tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+            document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+            tab.classList.add('active');
+            $('p-' + tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    function drawChart(containerId, data, maxVal) {
+        var el = $(containerId); el.innerHTML = '';
+        var cols = data.length;
+        var maxBars = 30;
+        var step = cols > maxBars ? Math.ceil(cols / maxBars) : 1;
+        var filtered = [];
+        for (var i = 0; i < cols; i += step) filtered.push(data[i]);
+        if ((cols - 1) % step !== 0) filtered.push(data[cols - 1]);
+
+        filtered.forEach(function(d) {
+            var col = document.createElement('div'); col.className = 'chart-col';
+            var h1 = maxVal > 0 ? (d.principal / maxVal * 130) : 0;
+            var h2 = maxVal > 0 ? (d.interest / maxVal * 130) : 0;
+            col.innerHTML = '<div class="chart-bar principal" style="height:'+h1+'px"></div><div class="chart-bar interest" style="height:'+Math.max(h2,2)+'px"></div><div class="chart-label">'+d.label+'</div>';
+            el.appendChild(col);
+        });
+    }
+
+    // ── Compound Interest ──
+    window.calcCI = function() {
+        var P = num('ci-principal'), r = num('ci-rate')/100, y = num('ci-years'), n = parseInt($('ci-freq').value);
+        var rows = [], totalInt = 0;
+        for (var i = 1; i <= y; i++) {
+            var A = P * Math.pow(1 + r/n, n * i);
+            var princ = P;
+            var interest = A - princ;
+            totalInt = interest;
+            rows.push({year: i, principal: princ, interest: interest, balance: A});
+        }
+        var finalA = P * Math.pow(1 + r/n, n * y);
+        var effRate = (Math.pow(1 + r/n, n) - 1) * 100;
+
+        $('ci-final').textContent = '$' + fmt(finalA);
+        $('ci-interest').textContent = '$' + fmt(finalA - P);
+        $('ci-eff').textContent = effRate.toFixed(2) + '%';
+
+        var tbody = $('ci-tbody'); tbody.innerHTML = '';
+        rows.forEach(function(row) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>'+row.year+'</td><td>$'+fmt(row.principal)+'</td><td>$'+fmt(row.interest)+'</td><td>$'+fmt(row.balance)+'</td>';
+            tbody.appendChild(tr);
+        });
+
+        var chartData = rows.map(function(r){ return {principal: r.principal, interest: r.interest, label: 'Y'+r.year}; });
+        drawChart('ci-chart', chartData, finalA);
+        $('ci-result').classList.add('show');
+    };
+
+    // ── DCA / SIP ──
+    window.calcDCA = function() {
+        var init = num('dca-init'), monthly = num('dca-monthly'), r = num('dca-rate')/100, y = num('dca-years');
+        var stepUp = num('dca-stepup')/100, inflation = num('dca-inflation')/100;
+        var mr = r / 12, totalMonths = y * 12;
+        var balance = init, totalIn = init;
+        var yearly = [];
+
+        for (var m = 1; m <= totalMonths; m++) {
+            if (m > 1 && (m-1) % 12 === 0) monthly *= (1 + stepUp);
+            balance = balance * (1 + mr) + monthly;
+            totalIn += monthly;
+            if (m % 12 === 0) {
+                yearly.push({year: m/12, invested: totalIn, returns: balance - totalIn, balance: balance});
+            }
+        }
+
+        var finalV = balance;
+        var realV = inflation > 0 ? finalV / Math.pow(1 + inflation, y) : finalV;
+
+        $('dca-final').textContent = '$' + fmt(finalV);
+        $('dca-invested').textContent = '$' + fmt(totalIn);
+        $('dca-returns').textContent = '$' + fmt(finalV - totalIn);
+        $('dca-real').textContent = '$' + fmt(realV);
+
+        var chartData = yearly.map(function(r){ return {principal: r.invested, interest: r.returns, label: 'Y'+r.year}; });
+        drawChart('dca-chart', chartData, finalV);
+        $('dca-result').classList.add('show');
+    };
+
+    // ── Loan ──
+    window.calcLoan = function() {
+        var P = num('loan-amt'), r = num('loan-rate')/100/12, n = num('loan-years')*12;
+        var M = r === 0 ? P/n : P * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1);
+        var totalPay = M * n;
+        var totalInt = totalPay - P;
+
+        $('loan-monthly').textContent = '$' + fmt(M);
+        $('loan-total').textContent = '$' + fmt(totalPay);
+        $('loan-interest').textContent = '$' + fmt(totalInt);
+        $('loan-ratio').textContent = (totalInt/P*100).toFixed(1) + '%';
+
+        // Amortization chart (sampled yearly)
+        var balance = P, yearly = [];
+        for (var m = 1; m <= n; m++) {
+            var intPart = balance * r;
+            var princPart = M - intPart;
+            balance -= princPart;
+            if (m % 12 === 0 || m === n) {
+                var paid = P - balance;
+                yearly.push({principal: paid, interest: totalPay - M*m, label: 'Y'+Math.ceil(m/12)});
+            }
+        }
+        // Build stacked chart: principal portion vs interest portion of total paid
+        var chartData = [];
+        var bal2 = P;
+        for (var m2 = 1; m2 <= n; m2++) {
+            var intP = bal2 * r;
+            var princP = M - intP;
+            bal2 -= princP;
+            if (m2 % (Math.ceil(n/30)*12) === 0 || m2 === n) {
+                chartData.push({principal: P - Math.max(bal2,0), interest: M*m2 - (P - Math.max(bal2,0)), label: 'Y'+Math.ceil(m2/12)});
+            }
+        }
+        drawChart('loan-chart', chartData, totalPay);
+        $('loan-result').classList.add('show');
+    };
+
+    // ── Retirement ──
+    window.calcRetire = function() {
+        var age = num('ret-age'), retAge = num('ret-retage'), savings = num('ret-savings');
+        var monthly = num('ret-monthly'), rate = num('ret-rate')/100, inflation = num('ret-inflation')/100;
+        var spending = num('ret-spending'), retYrs = num('ret-yrs');
+
+        var yearsToRetire = retAge - age;
+        var mr = rate / 12;
+        var balance = savings;
+        for (var m = 1; m <= yearsToRetire * 12; m++) {
+            balance = balance * (1 + mr) + monthly;
+        }
+        var fund = balance;
+
+        // Real value in today's dollars
+        var realFund = fund / Math.pow(1 + inflation, yearsToRetire);
+
+        // Required fund: future monthly spending adjusted for inflation
+        var futureSpending = spending * Math.pow(1 + inflation, yearsToRetire);
+        // Present value of annuity (in retirement years)
+        var retMr = rate / 12;
+        var retMonths = retYrs * 12;
+        var requiredFund = retMr === 0 ? futureSpending * retMonths : futureSpending * (1 - Math.pow(1 + retMr, -retMonths)) / retMr;
+
+        // Today's value of required fund
+        var requiredReal = requiredFund / Math.pow(1 + inflation, yearsToRetire);
+
+        $('ret-fund').textContent = '$' + fmtK(fund);
+        $('ret-real').textContent = '$' + fmtK(realFund);
+        $('ret-need').textContent = '$' + fmtK(requiredFund);
+        var statusEl = $('ret-status');
+        if (fund >= requiredFund) {
+            statusEl.textContent = 'On Track';
+            statusEl.style.color = 'var(--green)';
+        } else {
+            var gap = requiredFund - fund;
+            statusEl.textContent = 'Gap: $' + fmtK(gap);
+            statusEl.style.color = 'var(--red)';
+        }
+
+        $('retire-result').classList.add('show');
+    };
+
+    // ── Rule of 72 ──
+    window.calcR72 = function() {
+        var rate = num('r72-rate');
+        var years72 = 72 / rate;
+        var yearsExact = Math.log(2) / Math.log(1 + rate/100);
+
+        $('r72-years').textContent = years72.toFixed(1);
+        $('r72-exact').textContent = yearsExact.toFixed(2) + ' yrs';
+        $('r72-result').classList.add('show');
+    };
+
+    // Auto-calculate on Enter
+    document.querySelectorAll('input').forEach(function(inp) {
+        inp.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                var panel = inp.closest('.panel');
+                if (panel) { var btn = panel.querySelector('.btn-primary'); if (btn) btn.click(); }
+                e.preventDefault();
+            }
+        });
+    });
+
+})();
+</script>
+</body>
+</html>
