@@ -147,16 +147,7 @@
                     <label>Years <span class="cn">/ 投资年限</span></label>
                     <input type="text" id="ci-years" value="10" inputmode="decimal" placeholder="e.g. 10 (decimals OK)">
                 </div>
-                <div class="field">
-                    <label>Compounding <span class="cn">/ 复利频率</span></label>
-                    <select id="ci-freq">
-                        <option value="1">Annually / 每年</option>
-                        <option value="2">Semi-annually / 每半年</option>
-                        <option value="4">Quarterly / 每季度</option>
-                        <option value="12" selected>Monthly / 每月</option>
-                        <option value="365">Daily / 每日</option>
-                    </select>
-                </div>
+                <input type="hidden" id="ci-freq" value="1">
             </div>
             <div class="actions">
                 <button class="btn btn-primary" onclick="calcCI()">Calculate · 计算</button>
@@ -199,11 +190,10 @@
                 </div>
                 <div class="note-box">
                     <strong>📐 Formula · 公式</strong><br>
-                    <em>A = P × (1 + r/n)<sup>n×t</sup></em><br>
-                    When <em>r = 0</em>, final amount equals principal and all interest is zero.
-                    The effective annual rate is <em>(1 + r/n)<sup>n</sup> − 1</em>.
-                    Non-integer years are supported with a final partial-period row.<br>
-                    <em>当利率为 0 时，最终金额等于本金，总利息为零。支持小数年份，末尾为部分周期。</em>
+                    <em>A = P × (1 + r)<sup>t</sup></em> （年复利）<br>
+                    <em>r = 年利率, t = 年限</em><br>
+                    When <em>r = 0</em>, final amount equals principal and all interest is zero.<br>
+                    <em>当利率为 0 时，最终金额等于本金，总利息为零。</em>
                 </div>
             </div>
         </div>
