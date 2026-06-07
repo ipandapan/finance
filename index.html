@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'">
-    <title>Finance Calculator</title>
+    <title>Finance Calculator · 理财计算器</title>
     <style>
+        @font-face{font-family:'Inter';font-style:normal;font-weight:200;font-display:swap;src:url(fonts/inter-200.woff2) format('woff2')}
         @font-face{font-family:'Inter';font-style:normal;font-weight:300;font-display:swap;src:url(fonts/inter-300.woff2) format('woff2')}
         @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/inter-400.woff2) format('woff2')}
         @font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/inter-500.woff2) format('woff2')}
         @font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/inter-600.woff2) format('woff2')}
+        @font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/inter-700.woff2) format('woff2')}
         @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:300;font-display:swap;src:url(fonts/jbm-300.woff2) format('woff2')}
         @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/jbm-400.woff2) format('woff2')}
         @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/jbm-500.woff2) format('woff2')}
@@ -19,31 +21,59 @@
         body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
         .wrap{max-width:960px;margin:0 auto;padding:32px 20px}
         h1{font-size:24px;font-weight:600;margin-bottom:4px}
-        .subtitle{font-size:13px;color:var(--muted);margin-bottom:28px}
+        .subtitle{font-size:13px;color:var(--muted);margin-bottom:24px}
+
+        /* Disclaimer */
+        .disclaimer{background:linear-gradient(135deg,#fef9e7,#fefce8);border:1px solid rgba(234,179,8,.25);border-radius:12px;padding:14px 18px;margin-bottom:24px;font-size:12px;color:#92400e;line-height:1.7}
+        .disclaimer strong{font-weight:600}
+
+        /* Tabs */
         .tabs{display:flex;gap:4px;background:rgba(0,0,0,.03);border-radius:12px;padding:4px;margin-bottom:24px;overflow-x:auto}
         .tab{padding:10px 14px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:none;white-space:nowrap;transition:all .2s;line-height:1.4}
         .tab:hover{color:var(--ink)}.tab.active{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08);font-weight:600}
         .tab small{display:block;font-size:10px;font-weight:400;color:var(--muted)}
+
+        /* Panels */
         .panel{display:none}.panel.active{display:block}
+
+        /* Card */
         .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);padding:28px;margin-bottom:20px}
+
+        /* Grid */
         .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid.tri{grid-template-columns:1fr 1fr 1fr}
+
+        /* Fields */
         .field{display:flex;flex-direction:column;gap:6px}
         label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.3px}
         label .cn{color:#aaa;font-size:11px}
         input,select{font-family:var(--mono);font-size:16px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:#f8f9fa;color:var(--ink);outline:none;transition:border .2s}
         input:focus,select:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(0,113,227,.07)}
+        input.invalid{border-color:var(--red);background:#fef2f2}
         select{cursor:pointer}
+
+        /* Buttons */
         .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
-        .btn:active{transform:scale(.98)}.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#0062c4}
-        .actions{margin-top:20px;display:flex;gap:10px}
+        .btn:active{transform:scale(.98)}
+        .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#0062c4}
+        .actions{margin-top:20px;display:flex;gap:10px;align-items:center}
+
+        /* Validation */
+        .val-msg{font-size:11px;color:var(--red);display:none;margin-top:2px}
+        .val-msg.show{display:block}
+        .err-box{display:none;background:#fef2f2;border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:12px 16px;margin-top:12px;font-size:13px;color:#991b1b;line-height:1.6}
+        .err-box.show{display:block}
+
+        /* Results */
         .results{display:none;margin-top:24px}.results.show{display:block}
         .result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
         .result-card{background:#f8f9fa;border-radius:12px;padding:16px;text-align:center}
         .result-card.highlight{background:linear-gradient(135deg,#e8f4fd,#f0fdf4);border:1px solid rgba(0,113,227,.1)}
         .result-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
         .result-label .cn{display:block;font-size:10px;letter-spacing:0;text-transform:none;margin-top:2px;color:#aaa}
-        .result-value{font-family:var(--mono);font-size:24px;font-weight:500;color:var(--ink)}
-        .result-value.green{color:var(--green)}.result-value.accent{color:var(--accent)}
+        .result-value{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--ink);word-break:break-all}
+        .result-value.green{color:var(--green)}.result-value.accent{color:var(--accent)}.result-value.red{color:var(--red)}
+
+        /* Charts */
         .chart-wrap{margin-top:20px}
         .chart-bar-bg{display:flex;align-items:flex-end;gap:2px;height:140px;padding:0 4px}
         .chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
@@ -53,167 +83,743 @@
         .chart-legend{display:flex;gap:16px;justify-content:center;margin-top:10px;font-size:11px;color:var(--muted)}
         .chart-legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
         .chart-legend .l1::before{background:var(--accent);opacity:.3}.chart-legend .l2::before{background:var(--accent)}
-        .tbl-wrap{max-height:320px;overflow-y:auto;margin-top:16px;border-radius:10px;border:1px solid var(--border)}
+
+        /* Tables */
+        .tbl-wrap{max-height:380px;overflow-y:auto;margin-top:16px;border-radius:10px;border:1px solid var(--border)}
         table{width:100%;border-collapse:collapse;font-size:13px}
-        th{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);background:#f8f9fa;padding:10px 12px;text-align:right;position:sticky;top:0}
+        th{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);background:#f8f9fa;padding:10px 12px;text-align:right;position:sticky;top:0;z-index:1}
         th:first-child{text-align:center}
         td{padding:8px 12px;text-align:right;border-top:1px solid var(--border);font-family:var(--mono);font-size:12px}
-        td:first-child{text-align:center;color:var(--muted)}tr:hover td{background:#f8f9fa}
+        td:first-child{text-align:center;color:var(--muted)}
+        tr:hover td{background:#f8f9fa}
+        tr.final td{font-weight:600;border-top:2px solid var(--accent)}
+
+        /* Note boxes */
+        .note-box{background:#f0f7ff;border:1px solid rgba(0,113,227,.12);border-radius:12px;padding:14px 18px;margin-top:16px;font-size:12px;color:#1e40af;line-height:1.7}
+        .note-box strong{font-weight:600}
+
+        /* Footnotes */
         .footnote{font-size:11px;color:var(--dim);margin-top:16px;line-height:1.6}
-        @media(max-width:640px){.grid,.grid.tri{grid-template-columns:1fr}.result-grid{grid-template-columns:1fr 1fr}.tabs{gap:2px}.tab{padding:8px 10px;font-size:12px}.tab small{font-size:9px}.wrap{padding:16px 12px}}
+
+        /* Responsive */
+        @media(max-width:640px){
+            .grid,.grid.tri{grid-template-columns:1fr}
+            .result-grid{grid-template-columns:1fr 1fr}
+            .result-value{font-size:18px}
+            .tabs{gap:2px}.tab{padding:8px 10px;font-size:12px}.tab small{font-size:9px}
+            .wrap{padding:16px 12px}
+            .card{padding:18px}
+        }
     </style>
 </head>
 <body>
 <div class="wrap">
-    <h1>Finance Calculator</h1>
-    <p class="subtitle">Compound interest, DCA/SIP investment & loan calculation<br>复利、定投与贷款计算</p>
+    <h1>Finance Calculator · 理财计算器</h1>
+    <p class="subtitle">Compound interest, DCA/SIP &amp; loan calculation — 复利、定投与贷款计算</p>
+
+    <div class="disclaimer">
+        <strong>⚠ Disclaimer · 免责声明</strong><br>
+        This calculator is for educational and estimation purposes only. It does not constitute financial advice.
+        Actual returns, interest rates, and loan terms vary by institution and market conditions.
+        All figures are estimates — verify with your financial advisor or lender before making decisions.<br>
+        <em>本计算器仅供学习与估算参考，不构成任何理财建议。实际收益、利率、贷款条款因机构与市场而异。所有数据均为估算值，决策前请咨询专业财务顾问。</em>
+    </div>
 
     <div class="tabs" id="tabs">
         <button class="tab active" data-tab="ci">Compound Interest<small>复利计算</small></button>
         <button class="tab" data-tab="dca">DCA / SIP<small>定投计算</small></button>
         <button class="tab" data-tab="loan">Loan<small>贷款计算</small></button>
-
-
     </div>
 
-    <!-- Compound Interest -->
+    <!-- ===== Compound Interest ===== -->
     <div class="panel active" id="p-ci">
         <div class="card">
             <div class="grid">
-                <div class="field"><label>Principal <span class="cn">/ 本金</span></label><input type="text" id="ci-principal" value="10000" inputmode="decimal"></div>
-                <div class="field"><label>Annual Rate (%) <span class="cn">/ 年利率</span></label><input type="text" id="ci-rate" value="6" inputmode="decimal"></div>
-                <div class="field"><label>Years <span class="cn">/ 投资年限</span></label><input type="text" id="ci-years" value="10" inputmode="numeric"></div>
-                <div class="field"><label>Compounding <span class="cn">/ 复利频率</span></label>
-                    <select id="ci-freq"><option value="1">Annually / 每年</option><option value="2">Semi-annually / 每半年</option><option value="4">Quarterly / 每季度</option><option value="12" selected>Monthly / 每月</option><option value="365">Daily / 每日</option></select>
+                <div class="field">
+                    <label>Principal <span class="cn">/ 本金</span></label>
+                    <input type="text" id="ci-principal" value="10000" inputmode="decimal" placeholder="e.g. 10000">
+                </div>
+                <div class="field">
+                    <label>Annual Rate (%) <span class="cn">/ 年利率</span></label>
+                    <input type="text" id="ci-rate" value="6" inputmode="decimal" placeholder="e.g. 6 = 6%">
+                </div>
+                <div class="field">
+                    <label>Years <span class="cn">/ 投资年限</span></label>
+                    <input type="text" id="ci-years" value="10" inputmode="decimal" placeholder="e.g. 10 (decimals OK)">
+                </div>
+                <div class="field">
+                    <label>Compounding <span class="cn">/ 复利频率</span></label>
+                    <select id="ci-freq">
+                        <option value="1">Annually / 每年</option>
+                        <option value="2">Semi-annually / 每半年</option>
+                        <option value="4">Quarterly / 每季度</option>
+                        <option value="12" selected>Monthly / 每月</option>
+                        <option value="365">Daily / 每日</option>
+                    </select>
                 </div>
             </div>
-            <div class="actions"><button class="btn btn-primary" onclick="calcCI()">Calculate / 计算</button></div>
+            <div class="actions">
+                <button class="btn btn-primary" onclick="calcCI()">Calculate · 计算</button>
+            </div>
+            <div class="err-box" id="ci-err"></div>
             <div class="results" id="ci-result">
                 <div class="result-grid">
-                    <div class="result-card highlight"><div class="result-label">Final Amount<span class="cn">最终金额</span></div><div class="result-value accent" id="ci-final"></div></div>
-                    <div class="result-card"><div class="result-label">Total Interest<span class="cn">总利息</span></div><div class="result-value green" id="ci-interest"></div></div>
-                    <div class="result-card"><div class="result-label">Effective Rate<span class="cn">实际年利率</span></div><div class="result-value" id="ci-eff"></div></div>
+                    <div class="result-card highlight">
+                        <div class="result-label">Final Amount<span class="cn">最终金额</span></div>
+                        <div class="result-value accent" id="ci-final"></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Total Interest<span class="cn">总利息</span></div>
+                        <div class="result-value green" id="ci-interest"></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Effective Rate<span class="cn">实际年利率</span></div>
+                        <div class="result-value" id="ci-eff"></div>
+                    </div>
                 </div>
-                <div class="chart-wrap"><div class="chart-bar-bg" id="ci-chart"></div><div class="chart-legend"><span class="l1">Principal 本金</span><span class="l2">Interest 利息</span></div></div>
-                <div class="tbl-wrap"><table><thead><tr><th>Year 年份</th><th>Start Balance 年初余额</th><th>Interest 当年利息</th><th>End Balance 年末余额</th></tr></thead><tbody id="ci-tbody"></tbody></table></div>
+                <div class="chart-wrap">
+                    <div class="chart-bar-bg" id="ci-chart"></div>
+                    <div class="chart-legend">
+                        <span class="l1">Principal 本金</span>
+                        <span class="l2">Interest 利息</span>
+                    </div>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Year 年份</th>
+                                <th>Start Balance 年初余额</th>
+                                <th>Interest 当年利息</th>
+                                <th>End Balance 年末余额</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ci-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="note-box">
+                    <strong>📐 Formula · 公式</strong><br>
+                    <em>A = P × (1 + r/n)<sup>n×t</sup></em><br>
+                    When <em>r = 0</em>, final amount equals principal and all interest is zero.
+                    The effective annual rate is <em>(1 + r/n)<sup>n</sup> − 1</em>.
+                    Non-integer years are supported with a final partial-period row.<br>
+                    <em>当利率为 0 时，最终金额等于本金，总利息为零。支持小数年份，末尾为部分周期。</em>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- DCA / SIP -->
+    <!-- ===== DCA / SIP ===== -->
     <div class="panel" id="p-dca">
         <div class="card">
             <div class="grid tri">
-                <div class="field"><label>Initial Amount <span class="cn">/ 初始金额</span></label><input type="text" id="dca-init" value="10000" inputmode="decimal"></div>
-                <div class="field"><label>Monthly <span class="cn">/ 每月定投</span></label><input type="text" id="dca-monthly" value="1000" inputmode="decimal"></div>
-                <div class="field"><label>Annual Rate (%) <span class="cn">/ 年化收益</span></label><input type="text" id="dca-rate" value="6" inputmode="decimal"></div>
-                <div class="field"><label>Years <span class="cn">/ 投资年限</span></label><input type="text" id="dca-years" value="20" inputmode="numeric"></div>
-                <div class="field"><label>Annual Increase (%) <span class="cn">/ 年递增</span></label><input type="text" id="dca-stepup" value="0" inputmode="decimal"></div>
-                <div class="field"><label>Inflation (%) <span class="cn">/ 通胀率</span></label><input type="text" id="dca-inflation" value="3" inputmode="decimal"></div>
+                <div class="field">
+                    <label>Initial Amount <span class="cn">/ 初始金额</span></label>
+                    <input type="text" id="dca-init" value="0" inputmode="decimal" placeholder="e.g. 0">
+                </div>
+                <div class="field">
+                    <label>Monthly Contribution <span class="cn">/ 每月定投</span></label>
+                    <input type="text" id="dca-monthly" value="1000" inputmode="decimal" placeholder="e.g. 1000">
+                </div>
+                <div class="field">
+                    <label>Annual Return (%) <span class="cn">/ 年化收益</span></label>
+                    <input type="text" id="dca-rate" value="6" inputmode="decimal" placeholder="e.g. 6 = 6%">
+                </div>
+                <div class="field">
+                    <label>Years <span class="cn">/ 投资年限</span></label>
+                    <input type="text" id="dca-years" value="10" inputmode="decimal" placeholder="e.g. 10 (decimals OK)">
+                </div>
+                <div class="field">
+                    <label>Annual Increase (%) <span class="cn">/ 年递增</span></label>
+                    <input type="text" id="dca-stepup" value="0" inputmode="decimal" placeholder="e.g. 3 = 3%">
+                </div>
+                <div class="field">
+                    <label>Inflation (%) <span class="cn">/ 通胀率</span></label>
+                    <input type="text" id="dca-inflation" value="0" inputmode="decimal" placeholder="e.g. 2 = 2%">
+                </div>
             </div>
-            <div class="actions"><button class="btn btn-primary" onclick="calcDCA()">Calculate / 计算</button></div>
+            <div class="actions">
+                <button class="btn btn-primary" onclick="calcDCA()">Calculate · 计算</button>
+            </div>
+            <div class="err-box" id="dca-err"></div>
             <div class="results" id="dca-result">
                 <div class="result-grid">
-                    <div class="result-card highlight"><div class="result-label">Final Value<span class="cn">最终价值</span></div><div class="result-value accent" id="dca-final"></div></div>
-                    <div class="result-card"><div class="result-label">Total Invested<span class="cn">累计投入</span></div><div class="result-value" id="dca-invested"></div></div>
-                    <div class="result-card"><div class="result-label">Total Returns<span class="cn">总收益</span></div><div class="result-value green" id="dca-returns"></div></div>
-                    <div class="result-card"><div class="result-label">Real Value<span class="cn">实际购买力</span></div><div class="result-value" id="dca-real"></div></div>
+                    <div class="result-card highlight">
+                        <div class="result-label">Final Value<span class="cn">最终价值</span></div>
+                        <div class="result-value accent" id="dca-final"></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Total Invested<span class="cn">累计投入</span></div>
+                        <div class="result-value" id="dca-invested"></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Total Returns<span class="cn">总收益</span></div>
+                        <div class="result-value green" id="dca-returns"></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Real Value<span class="cn">实际购买力</span></div>
+                        <div class="result-value" id="dca-real"></div>
+                    </div>
                 </div>
-                <div class="chart-wrap"><div class="chart-bar-bg" id="dca-chart"></div><div class="chart-legend"><span class="l1">Invested 投入</span><span class="l2">Returns 收益</span></div></div>
+                <div class="chart-wrap">
+                    <div class="chart-bar-bg" id="dca-chart"></div>
+                    <div class="chart-legend">
+                        <span class="l1">Invested 投入</span>
+                        <span class="l2">Returns 收益</span>
+                    </div>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Year 年份</th>
+                                <th>Invested 累计投入</th>
+                                <th>Balance 账户余额</th>
+                                <th>Returns 累计收益</th>
+                                <th>Monthly 当年定投</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dca-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="note-box">
+                    <strong>📐 Methodology · 计算方法</strong><br>
+                    Monthly rate = annual rate ÷ 12. Contributions are applied at month-end (balance × 1 + monthly rate) then new contribution added).
+                    From month 13 onward, annual step-up increases the monthly contribution by the step-up rate each year:
+                    <em>contribution(m) = C × (1 + g)<sup>⌊(m−1)/12⌋</sup></em>.<br>
+                    Real purchasing power discounts the final balance by cumulative inflation: <em>FV / (1 + inflation)<sup>t</sup></em>.<br>
+                    <em>月利率 = 年利率 ÷ 12。每月末定投（先计息再加投）。第 13 个月起每年按递增率调整月供。实际购买力按通胀复利折现。</em>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Loan -->
+    <!-- ===== Loan ===== -->
     <div class="panel" id="p-loan">
         <div class="card">
             <div class="grid tri">
-                <div class="field"><label>Loan Amount <span class="cn">/ 贷款金额</span></label><input type="text" id="loan-amt" value="1000000" inputmode="decimal"></div>
-                <div class="field"><label>Annual Rate (%) <span class="cn">/ 年利率</span></label><input type="text" id="loan-rate" value="3.0" inputmode="decimal"></div>
-                <div class="field"><label>Term (Years) <span class="cn">/ 贷款年限</span></label><input type="text" id="loan-years" value="30" inputmode="numeric"></div>
+                <div class="field">
+                    <label>Loan Amount <span class="cn">/ 贷款金额</span></label>
+                    <input type="text" id="loan-amt" value="300000" inputmode="decimal" placeholder="e.g. 300000">
+                </div>
+                <div class="field">
+                    <label>Annual Rate (%) <span class="cn">/ 年利率</span></label>
+                    <input type="text" id="loan-rate" value="6" inputmode="decimal" placeholder="e.g. 6 = 6%">
+                </div>
+                <div class="field">
+                    <label>Term (Years) <span class="cn">/ 贷款年限</span></label>
+                    <input type="text" id="loan-years" value="30" inputmode="numeric" placeholder="e.g. 30">
+                </div>
             </div>
-            <div class="actions"><button class="btn btn-primary" onclick="calcLoan()">Calculate / 计算</button></div>
+            <div class="actions">
+                <button class="btn btn-primary" onclick="calcLoan()">Calculate · 计算</button>
+            </div>
+            <div class="err-box" id="loan-err"></div>
             <div class="results" id="loan-result">
                 <div class="result-grid">
-                    <div class="result-card highlight"><div class="result-label">Monthly Payment<span class="cn">月供</span></div><div class="result-value accent" id="loan-monthly"></div></div>
-                    <div class="result-card"><div class="result-label">Total Payment<span class="cn">还款总额</span></div><div class="result-value" id="loan-total"></div></div>
-                    <div class="result-card"><div class="result-label">Total Interest<span class="cn">总利息</span></div><div class="result-value" style="color:var(--red)" id="loan-interest"></div></div>
-                    <div class="result-card"><div class="result-label">Interest Ratio<span class="cn">利息占比</span></div><div class="result-value" id="loan-ratio"></div></div>
+                    <div class="result-card highlight">
+                        <div class="result-label">Monthly Payment<span class="cn">月供</span></div>
+                        <div class="result-value accent" id="loan-monthly"></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Total Payment<span class="cn">还款总额</span></div>
+                        <div class="result-value" id="loan-total"></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Total Interest<span class="cn">总利息</span></div>
+                        <div class="result-value red" id="loan-interest"></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">I/P Ratio<span class="cn">利息本金比</span></div>
+                        <div class="result-value" id="loan-ipratio"></div>
+                    </div>
                 </div>
-                <div class="chart-wrap"><div class="chart-bar-bg" id="loan-chart"></div><div class="chart-legend"><span class="l1">Principal 本金</span><span class="l2" style="color:var(--red)">Interest 利息</span></div></div>
-                <p class="footnote">* Equal monthly installments (amortized). / 等额本息还款方式<br>* Actual payments may vary by lender. / 实际还款金额以银行为准。</p>
+                <div class="result-grid" style="margin-top:12px">
+                    <div class="result-card">
+                        <div class="result-label">Interest / Payment<span class="cn">利息占月供比</span></div>
+                        <div class="result-value" id="loan-itratio"></div>
+                    </div>
+                </div>
+                <div class="chart-wrap">
+                    <div class="chart-bar-bg" id="loan-chart"></div>
+                    <div class="chart-legend">
+                        <span class="l1">Principal 本金</span>
+                        <span style="color:var(--red)">Interest 利息</span>
+                    </div>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Year 年份</th>
+                                <th>Payment 年还款</th>
+                                <th>Principal 还本</th>
+                                <th>Interest 付息</th>
+                                <th>Balance 剩余本金</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loan-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="note-box">
+                    <strong>📐 Formula · 公式</strong><br>
+                    Equal monthly installment (amortized): <em>M = P × r × (1+r)<sup>n</sup> / ((1+r)<sup>n</sup> − 1)</em><br>
+                    When <em>r = 0</em>: <em>M = P / n</em>. Monthly payment is rounded to cents; the final period
+                    absorbs any rounding residual so remaining principal reaches exactly zero.<br>
+                    <em>等额本息还款。月供精确到分，最后一期调整差额使剩余本金归零。利率为 0 时月供 = 本金 ÷ 期数。</em>
+                </div>
+                <p class="footnote">* Actual payments may vary by lender. Prepayment penalties and other fees not included. / 实际还款金额以银行为准，不含提前还款违约金等其他费用。</p>
             </div>
         </div>
     </div>
-
-
-
-
 </div>
 
+<script src="decimal.min.js"></script>
 <script>
 (function(){
     'use strict';
-    var $=function(id){return document.getElementById(id)};
-    function num(id){return parseFloat($(id).value.replace(/,/g,''))||0}
-    function fmt(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
-    function fmtK(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(0)+'K':fmt(n)}
 
+    var Dec = Decimal;
+    var $ = function(id){ return document.getElementById(id); };
+
+    /* ── formatting ── */
+    function fmt(d) {
+        return d.toFixed(2, Dec.ROUND_HALF_UP);
+    }
+    function fmtCur(n) {
+        var s = fmt(new Dec(n));
+        var parts = s.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        return parts.join('.');
+    }
+    function fmtPct(d) {
+        return d.toFixed(2, Dec.ROUND_HALF_UP) + '%';
+    }
+
+    /* ── validation helpers ── */
+    function validateNum(val, id) {
+        var el = $(id);
+        el.classList.remove('invalid');
+        if (val === '' || val === null || val === undefined) return null;
+        try {
+            var d = new Dec(val.replace(/,/g, '').trim());
+            if (d.isNaN()) { el.classList.add('invalid'); return null; }
+            return d;
+        } catch(e) {
+            el.classList.add('invalid');
+            return null;
+        }
+    }
+    function valField(id, label) {
+        var v = validateNum($(id).value, id);
+        if (v === null) return { ok: false, msg: label + ' (en/zh): enter a valid number — 请输入有效数字' };
+        return { ok: true, val: v };
+    }
+    function showErr(id, msg) {
+        var el = $(id);
+        el.textContent = msg || '';
+        if (msg) el.classList.add('show'); else el.classList.remove('show');
+    }
+
+    /* ── tab switching ── */
     document.querySelectorAll('.tab').forEach(function(t){
-        t.addEventListener('click',function(){
-            document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
-            document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('active')});
-            t.classList.add('active');$('p-'+t.dataset.tab).classList.add('active');
+        t.addEventListener('click', function(){
+            document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+            document.querySelectorAll('.panel').forEach(function(x){ x.classList.remove('active'); });
+            t.classList.add('active');
+            $('p-' + t.dataset.tab).classList.add('active');
         });
     });
 
-    function drawChart(id,data,max){
-        var el=$(id);el.innerHTML='';
-        var step=data.length>30?Math.ceil(data.length/30):1,f=[];
-        for(var i=0;i<data.length;i+=step)f.push(data[i]);
-        if((data.length-1)%step!==0)f.push(data[data.length-1]);
+    /* ── enter key ── */
+    document.querySelectorAll('input').forEach(function(i){
+        i.addEventListener('keydown', function(e){
+            if (e.key === 'Enter') {
+                var p = i.closest('.panel');
+                if (p) { var b = p.querySelector('.btn-primary'); if (b) b.click(); }
+                e.preventDefault();
+            }
+        });
+    });
+
+    /* ── chart drawing ── */
+    function drawChart(id, data, max) {
+        var el = $(id); el.innerHTML = '';
+        if (data.length === 0) return;
+        var step = data.length > 30 ? Math.ceil(data.length / 30) : 1;
+        var f = [];
+        for (var i = 0; i < data.length; i += step) f.push(data[i]);
+        if ((data.length - 1) % step !== 0) f.push(data[data.length - 1]);
+        var mx = max || data.reduce(function(a, b){ return Math.max(a, b.principal + b.interest); }, 0);
+        if (mx === 0) mx = 1;
         f.forEach(function(d){
-            var c=document.createElement('div');c.className='chart-col';
-            var h1=max>0?(d.principal/max*130):0,h2=max>0?(d.interest/max*130):0;
-            c.innerHTML='<div class="chart-bar principal" style="height:'+h1+'px"></div><div class="chart-bar interest" style="height:'+Math.max(h2,2)+'px"></div><div class="chart-label">'+d.label+'</div>';
+            var c = document.createElement('div'); c.className = 'chart-col';
+            var h1 = (d.principal / mx) * 130;
+            var h2 = (d.interest / mx) * 130;
+            c.innerHTML = '<div class="chart-bar principal" style="height:' + Math.max(h1, 0) + 'px"></div>'
+                + '<div class="chart-bar interest" style="height:' + Math.max(h2, 0) + 'px"></div>'
+                + '<div class="chart-label">' + d.label + '</div>';
             el.appendChild(c);
         });
     }
 
-    window.calcCI=function(){
-        var P=num('ci-principal'),r=num('ci-rate')/100,y=num('ci-years'),n=parseInt($('ci-freq').value),rows=[];
-        var prevBal=P;
-        for(var i=1;i<=y;i++){var bal=P*Math.pow(1+r/n,n*i);var intY=bal-prevBal;rows.push({year:i,startBal:prevBal,interest:intY,endBal:bal});prevBal=bal}
-        var fA=P*Math.pow(1+r/n,n*y),eff=(Math.pow(1+r/n,n)-1)*100;
-        $('ci-final').textContent=fmt(fA);$('ci-interest').textContent=fmt(fA-P);$('ci-eff').textContent=eff.toFixed(2)+'%';
-        var tb=$('ci-tbody');tb.innerHTML='';
-        rows.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td>'+r.year+'</td><td>'+fmt(r.startBal)+'</td><td>'+fmt(r.interest)+'</td><td>'+fmt(r.endBal)+'</td>';tb.appendChild(tr)});
-        drawChart('ci-chart',rows.map(function(r){return{principal:r.startBal,interest:r.interest,label:'Y'+r.year}}),fA);
+    /* ══════════════════════════════════════════
+       Module 1: Compound Interest
+       ══════════════════════════════════════════ */
+    window.calcCI = function() {
+        showErr('ci-err', null);
+        var vP = valField('ci-principal', 'Principal / 本金');
+        var vR = valField('ci-rate', 'Annual Rate / 年利率');
+        var vY = valField('ci-years', 'Years / 年限');
+        if (!vP.ok) { showErr('ci-err', vP.msg); return; }
+        if (!vR.ok) { showErr('ci-err', vR.msg); return; }
+        if (!vY.ok) { showErr('ci-err', vY.msg); return; }
+
+        var P = vP.val, rPct = vR.val, t = vY.val;
+        var n = new Dec(parseInt($('ci-freq').value) || 12);
+
+        if (P.lt(0)) { showErr('ci-err', 'Principal must be ≥ 0 — 本金不能为负'); return; }
+        if (t.lte(0)) { showErr('ci-err', 'Years must be > 0 — 年限必须大于 0'); return; }
+
+        var r = rPct.div(100);
+        var fullYears = t.floor();
+        var frac = t.minus(fullYears);
+
+        // Calculate final amount
+        // A = P * (1 + r/n)^(n*t)
+        var nt;
+        try { nt = n.times(t); } catch(e) { showErr('ci-err', 'Calculation overflow — 计算溢出'); return; }
+
+        var finalAmount, effectiveRate;
+        if (r.eq(0)) {
+            finalAmount = P;
+            effectiveRate = new Dec(0);
+        } else {
+            var base = new Dec(1).plus(r.div(n));
+            finalAmount = P.times(base.pow(nt.toNumber()));
+            effectiveRate = base.pow(n.toNumber()).minus(1).times(100);
+        }
+
+        $('ci-final').textContent = fmtCur(finalAmount);
+        var totalInterest = finalAmount.minus(P);
+        $('ci-interest').textContent = fmtCur(totalInterest);
+        $('ci-eff').textContent = fmtPct(effectiveRate);
+
+        // Yearly breakdown
+        var rows = [];
+        var prevBal = P;
+        var nYears = fullYears.toNumber();
+        var useDecYear = nYears < 2000; // safety limit
+
+        if (useDecYear) {
+            for (var i = 1; i <= nYears; i++) {
+                var yrCount = new Dec(i).times(n);
+                var bal;
+                if (r.eq(0)) {
+                    bal = P;
+                } else {
+                    var b = new Dec(1).plus(r.div(n));
+                    bal = P.times(b.pow(yrCount.toNumber()));
+                }
+                var interest = bal.minus(prevBal);
+                rows.push({ year: i, startBal: prevBal, interest: interest, endBal: bal });
+                prevBal = bal;
+            }
+            // Fractional year
+            if (frac.gt(0)) {
+                rows.push({ year: 'final', startBal: prevBal, interest: finalAmount.minus(prevBal), endBal: finalAmount });
+            }
+        }
+
+        // Render table
+        var tb = $('ci-tbody'); tb.innerHTML = '';
+        rows.forEach(function(r){
+            var tr = document.createElement('tr');
+            if (r.year === 'final') tr.className = 'final';
+            var yrLabel = r.year === 'final' ? 'Final · 末期' : r.year;
+            tr.innerHTML = '<td>' + yrLabel + '</td>'
+                + '<td>' + fmtCur(r.startBal) + '</td>'
+                + '<td>' + fmtCur(r.interest) + '</td>'
+                + '<td>' + fmtCur(r.endBal) + '</td>';
+            tb.appendChild(tr);
+        });
+
+        // Chart
+        var chartData = rows.map(function(r){
+            return {
+                principal: r.startBal.toNumber ? r.startBal.toNumber() : Number(r.startBal),
+                interest: r.interest.toNumber ? r.interest.toNumber() : Number(r.interest),
+                label: r.year === 'final' ? 'F' : 'Y' + r.year
+            };
+        });
+        var chartMax = finalAmount.toNumber();
+        drawChart('ci-chart', chartData, chartMax);
+
         $('ci-result').classList.add('show');
     };
 
-    window.calcDCA=function(){
-        var init=num('dca-init'),mo=num('dca-monthly'),r=num('dca-rate')/100,y=num('dca-years'),su=num('dca-stepup')/100,inf=num('dca-inflation')/100;
-        var mr=r/12,tm=y*12,bal=init,ti=init,yr=[];
-        for(var m=1;m<=tm;m++){if(m>1&&(m-1)%12===0)mo*=(1+su);bal=bal*(1+mr)+mo;ti+=mo;if(m%12===0)yr.push({year:m/12,invested:ti,returns:bal-ti,balance:bal})}
-        var fv=bal,rv=inf>0?fv/Math.pow(1+inf,y):fv;
-        $('dca-final').textContent=fmt(fv);$('dca-invested').textContent=fmt(ti);$('dca-returns').textContent=fmt(fv-ti);$('dca-real').textContent=fmt(rv);
-        drawChart('dca-chart',yr.map(function(r){return{principal:r.invested,interest:r.returns,label:'Y'+r.year}}),fv);
+    /* ══════════════════════════════════════════
+       Module 2: DCA / SIP
+       ══════════════════════════════════════════ */
+    window.calcDCA = function() {
+        showErr('dca-err', null);
+        var vI = valField('dca-init', 'Initial Amount / 初始金额');
+        var vM = valField('dca-monthly', 'Monthly / 每月定投');
+        var vR = valField('dca-rate', 'Annual Return / 年化收益');
+        var vY = valField('dca-years', 'Years / 年限');
+        var vS = valField('dca-stepup', 'Annual Increase / 年递增');
+        var vInf = valField('dca-inflation', 'Inflation / 通胀率');
+        if (!vI.ok) { showErr('dca-err', vI.msg); return; }
+        if (!vM.ok) { showErr('dca-err', vM.msg); return; }
+        if (!vR.ok) { showErr('dca-err', vR.msg); return; }
+        if (!vY.ok) { showErr('dca-err', vY.msg); return; }
+        if (!vS.ok) { showErr('dca-err', vS.msg); return; }
+        if (!vInf.ok) { showErr('dca-err', vInf.msg); return; }
+
+        var init = vI.val, C0 = vM.val, r = vR.val.div(100), t = vY.val;
+        var stepUp = vS.val.div(100), inflation = vInf.val.div(100);
+
+        if (init.lt(0)) { showErr('dca-err', 'Initial amount must be ≥ 0 — 初始金额不能为负'); return; }
+        if (C0.lt(0)) { showErr('dca-err', 'Monthly contribution must be ≥ 0 — 每月定投不能为负'); return; }
+        if (t.lte(0)) { showErr('dca-err', 'Years must be > 0 — 年限必须大于 0'); return; }
+        if (stepUp.lt(0)) { showErr('dca-err', 'Annual increase must be ≥ 0 — 年递增不能为负'); return; }
+        if (inflation.lt(0)) { showErr('dca-err', 'Inflation must be ≥ 0 — 通胀率不能为负'); return; }
+
+        var monthlyRate = r.div(12);
+        // Total months (may be fractional)
+        var totalMonthsDec = t.times(12);
+        var totalMonths = totalMonthsDec.floor().toNumber();
+        var fracMonth = totalMonthsDec.minus(totalMonths);
+
+        var bal = init;
+        var totalInvested = init;
+        var C = C0;
+        var yearlyRows = [];
+
+        if (totalMonths > 10000) { showErr('dca-err', 'Too many periods (>10,000 months) — 期数过多 (>10,000 月)'); return; }
+
+        for (var m = 1; m <= totalMonths; m++) {
+            // Step-up from month 13 onward
+            if (m > 1 && (m - 1) % 12 === 0) {
+                C = C.times(new Dec(1).plus(stepUp));
+            }
+            // Apply interest then contribution (month-end)
+            bal = bal.times(new Dec(1).plus(monthlyRate)).plus(C);
+            totalInvested = totalInvested.plus(C);
+
+            // Year-end snapshot
+            if (m % 12 === 0) {
+                yearlyRows.push({
+                    year: m / 12,
+                    invested: totalInvested,
+                    balance: bal,
+                    returns: bal.minus(totalInvested),
+                    monthly: C
+                });
+            }
+        }
+        // Fractional month at end
+        if (fracMonth.gt(0)) {
+            var fracMths = fracMonth.toNumber();
+            // Simpler: treat as partial period
+            bal = bal.times(new Dec(1).plus(monthlyRate.times(fracMths)));
+            yearlyRows.push({
+                year: 'final',
+                invested: totalInvested,
+                balance: bal,
+                returns: bal.minus(totalInvested),
+                monthly: C
+            });
+        }
+
+        var finalBalance = bal;
+        var realValue;
+        if (inflation.eq(0)) {
+            realValue = finalBalance;
+        } else {
+            var infFactor = new Dec(1).plus(inflation).pow(t.toNumber());
+            realValue = finalBalance.div(infFactor);
+        }
+
+        $('dca-final').textContent = fmtCur(finalBalance);
+        $('dca-invested').textContent = fmtCur(totalInvested);
+        $('dca-returns').textContent = fmtCur(finalBalance.minus(totalInvested));
+        $('dca-real').textContent = fmtCur(realValue);
+
+        // Render yearly table
+        var tb = $('dca-tbody'); tb.innerHTML = '';
+        yearlyRows.forEach(function(r){
+            var tr = document.createElement('tr');
+            if (r.year === 'final') tr.className = 'final';
+            var yrLabel = r.year === 'final' ? 'Final · 末期' : r.year;
+            tr.innerHTML = '<td>' + yrLabel + '</td>'
+                + '<td>' + fmtCur(r.invested) + '</td>'
+                + '<td>' + fmtCur(r.balance) + '</td>'
+                + '<td>' + fmtCur(r.returns) + '</td>'
+                + '<td>' + fmtCur(r.monthly) + '</td>';
+            tb.appendChild(tr);
+        });
+
+        // Chart
+        var chartData = yearlyRows.map(function(r){
+            return {
+                principal: r.invested.toNumber ? r.invested.toNumber() : Number(r.invested),
+                interest: r.returns.toNumber ? r.returns.toNumber() : Number(r.returns),
+                label: r.year === 'final' ? 'F' : 'Y' + r.year
+            };
+        });
+        var chartMax = finalBalance.toNumber();
+        drawChart('dca-chart', chartData, chartMax);
+
         $('dca-result').classList.add('show');
     };
 
-    window.calcLoan=function(){
-        var P=num('loan-amt'),r=num('loan-rate')/100/12,n=num('loan-years')*12;
-        var M=r===0?P/n:P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1),tp=M*n,ti=tp-P;
-        $('loan-monthly').textContent=fmt(M);$('loan-total').textContent=fmt(tp);$('loan-interest').textContent=fmt(ti);$('loan-ratio').textContent=(ti/P*100).toFixed(1)+'%';
-        var cd=[],b2=P,st=Math.ceil(n/30);
-        for(var m2=1;m2<=n;m2++){var ip=b2*r,pp=M-ip;b2-=pp;if(m2%st===0||m2===n)cd.push({principal:P-Math.max(b2,0),interest:M*m2-(P-Math.max(b2,0)),label:'Y'+Math.ceil(m2/12)})}
-        drawChart('loan-chart',cd,tp);$('loan-result').classList.add('show');
+    /* ══════════════════════════════════════════
+       Module 3: Loan (Amortized)
+       ══════════════════════════════════════════ */
+    window.calcLoan = function() {
+        showErr('loan-err', null);
+        var vP = valField('loan-amt', 'Loan Amount / 贷款金额');
+        var vR = valField('loan-rate', 'Annual Rate / 年利率');
+        var vY = valField('loan-years', 'Term / 年限');
+        if (!vP.ok) { showErr('loan-err', vP.msg); return; }
+        if (!vR.ok) { showErr('loan-err', vR.msg); return; }
+        if (!vY.ok) { showErr('loan-err', vY.msg); return; }
+
+        var P = vP.val, rPct = vR.val, years = vY.val;
+
+        if (P.lte(0)) { showErr('loan-err', 'Loan amount must be > 0 — 贷款金额必须大于 0'); return; }
+        if (rPct.lt(0)) { showErr('loan-err', 'Rate cannot be negative — 利率不能为负'); return; }
+        if (years.lte(0)) { showErr('loan-err', 'Term must be > 0 — 年限必须大于 0'); return; }
+
+        var yearlyRate = rPct.div(100);
+        var r = yearlyRate.div(12);
+        var n = years.times(12);
+        var nNum = n.toNumber();
+        if (!Number.isInteger(nNum)) {
+            showErr('loan-err', 'Term must produce a whole number of months — 年限须为整数月');
+            return;
+        }
+
+        var M; // monthly payment (exact)
+        if (r.eq(0)) {
+            M = P.div(n);
+        } else {
+            var onePlusR = new Dec(1).plus(r);
+            var onePlusRn = onePlusR.pow(nNum);
+            M = P.times(r).times(onePlusRn).div(onePlusRn.minus(1));
+        }
+
+        // Display monthly payment (rounded to cents)
+        var displayM = M.toFixed(2, Dec.ROUND_HALF_UP);
+        var displayMDec = new Dec(displayM);
+
+        // Amortization with last-period adjustment
+        var remaining = P;
+        var totalPayment = new Dec(0);
+        var totalInterestPaid = new Dec(0);
+        var totalPrincipalPaid = new Dec(0);
+        var yearlyRows = [];
+        var yearPayment = new Dec(0), yearPrincipal = new Dec(0), yearInterest = new Dec(0);
+
+        for (var i = 1; i <= nNum; i++) {
+            var interestPayment, principalPayment;
+
+            if (i === nNum) {
+                // Last period: pay off remaining
+                interestPayment = remaining.times(r);
+                principalPayment = remaining; // pay off exactly
+                remaining = new Dec(0);
+            } else {
+                interestPayment = remaining.times(r);
+                principalPayment = displayMDec.minus(interestPayment);
+                if (principalPayment.gt(remaining)) {
+                    principalPayment = remaining;
+                    remaining = new Dec(0);
+                } else {
+                    remaining = remaining.minus(principalPayment);
+                }
+            }
+
+            var periodPayment = interestPayment.plus(principalPayment);
+            totalPayment = totalPayment.plus(periodPayment);
+            totalInterestPaid = totalInterestPaid.plus(interestPayment);
+            totalPrincipalPaid = totalPrincipalPaid.plus(principalPayment);
+
+            yearPayment = yearPayment.plus(periodPayment);
+            yearPrincipal = yearPrincipal.plus(principalPayment);
+            yearInterest = yearInterest.plus(interestPayment);
+
+            if (i % 12 === 0 || i === nNum) {
+                yearlyRows.push({
+                    year: Math.ceil(i / 12),
+                    payment: yearPayment,
+                    principal: yearPrincipal,
+                    interest: yearInterest,
+                    balance: remaining
+                });
+                yearPayment = new Dec(0);
+                yearPrincipal = new Dec(0);
+                yearInterest = new Dec(0);
+            }
+        }
+
+        $('loan-monthly').textContent = fmtCur(displayMDec);
+        $('loan-total').textContent = fmtCur(totalPayment);
+        $('loan-interest').textContent = fmtCur(totalInterestPaid);
+
+        // Interest / Principal ratio
+        var ipRatio;
+        if (totalPrincipalPaid.eq(0)) {
+            ipRatio = new Dec(Infinity);
+        } else {
+            ipRatio = totalInterestPaid.div(totalPrincipalPaid).times(100);
+        }
+        $('loan-ipratio').textContent = ipRatio.isFinite() ? fmtPct(ipRatio) : 'N/A';
+
+        // Interest / Total Payment ratio
+        var itRatio;
+        if (totalPayment.eq(0)) {
+            itRatio = new Dec(0);
+        } else {
+            itRatio = totalInterestPaid.div(totalPayment).times(100);
+        }
+        $('loan-itratio').textContent = fmtPct(itRatio);
+
+        // Render yearly table
+        var tb = $('loan-tbody'); tb.innerHTML = '';
+        yearlyRows.forEach(function(r){
+            var tr = document.createElement('tr');
+            if (r.balance.eq(0)) tr.className = 'final';
+            tr.innerHTML = '<td>' + r.year + '</td>'
+                + '<td>' + fmtCur(r.payment) + '</td>'
+                + '<td>' + fmtCur(r.principal) + '</td>'
+                + '<td>' + fmtCur(r.interest) + '</td>'
+                + '<td>' + fmtCur(r.balance) + '</td>';
+            tb.appendChild(tr);
+        });
+
+        // Chart (cumulative)
+        var cumPrincipal = new Dec(0), cumInterest = new Dec(0);
+        var chartRows = [];
+        yearlyRows.forEach(function(r){
+            cumPrincipal = cumPrincipal.plus(r.principal);
+            cumInterest = cumInterest.plus(r.interest);
+            chartRows.push({
+                principal: cumPrincipal.toNumber(),
+                interest: cumInterest.toNumber(),
+                label: 'Y' + r.year
+            });
+        });
+        var chartMax = totalPayment.toNumber();
+        drawChart('loan-chart', chartRows, chartMax);
+
+        $('loan-result').classList.add('show');
     };
 
+    /* Auto-calculate on load */
+    calcCI();
 
-
-    document.querySelectorAll('input').forEach(function(i){i.addEventListener('keydown',function(e){if(e.key==='Enter'){var p=i.closest('.panel');if(p){var b=p.querySelector('.btn-primary');if(b)b.click()}e.preventDefault()}})});
 })();
 </script>
 </body>
