@@ -75,7 +75,7 @@
         <button class="tab" data-tab="dca">DCA / SIP<small>定投计算</small></button>
         <button class="tab" data-tab="loan">Loan<small>贷款计算</small></button>
         <button class="tab" data-tab="retire">Retirement<small>退休规划</small></button>
-        <button class="tab" data-tab="r72">Rule of 72<small>72法则</small></button>
+
     </div>
 
     <!-- Compound Interest -->
@@ -83,7 +83,7 @@
         <div class="card">
             <div class="grid">
                 <div class="field"><label>Principal <span class="cn">/ 本金</span></label><input type="text" id="ci-principal" value="10000" inputmode="decimal"></div>
-                <div class="field"><label>Annual Rate (%) <span class="cn">/ 年利率</span></label><input type="text" id="ci-rate" value="8" inputmode="decimal"></div>
+                <div class="field"><label>Annual Rate (%) <span class="cn">/ 年利率</span></label><input type="text" id="ci-rate" value="6" inputmode="decimal"></div>
                 <div class="field"><label>Years <span class="cn">/ 投资年限</span></label><input type="text" id="ci-years" value="10" inputmode="numeric"></div>
                 <div class="field"><label>Compounding <span class="cn">/ 复利频率</span></label>
                     <select id="ci-freq"><option value="1">Annually / 每年</option><option value="2">Semi-annually / 每半年</option><option value="4">Quarterly / 每季度</option><option value="12" selected>Monthly / 每月</option><option value="365">Daily / 每日</option></select>
@@ -97,7 +97,7 @@
                     <div class="result-card"><div class="result-label">Effective Rate<span class="cn">实际年利率</span></div><div class="result-value" id="ci-eff"></div></div>
                 </div>
                 <div class="chart-wrap"><div class="chart-bar-bg" id="ci-chart"></div><div class="chart-legend"><span class="l1">Principal 本金</span><span class="l2">Interest 利息</span></div></div>
-                <div class="tbl-wrap"><table><thead><tr><th>Year 年份</th><th>Principal 本金</th><th>Interest 利息</th><th>Balance 余额</th></tr></thead><tbody id="ci-tbody"></tbody></table></div>
+                <div class="tbl-wrap"><table><thead><tr><th>Year 年份</th><th>Start Balance 年初余额</th><th>Interest 当年利息</th><th>End Balance 年末余额</th></tr></thead><tbody id="ci-tbody"></tbody></table></div>
             </div>
         </div>
     </div>
@@ -106,12 +106,12 @@
     <div class="panel" id="p-dca">
         <div class="card">
             <div class="grid tri">
-                <div class="field"><label>Initial Amount <span class="cn">/ 初始金额</span></label><input type="text" id="dca-init" value="5000" inputmode="decimal"></div>
-                <div class="field"><label>Monthly <span class="cn">/ 每月定投</span></label><input type="text" id="dca-monthly" value="500" inputmode="decimal"></div>
-                <div class="field"><label>Annual Rate (%) <span class="cn">/ 年化收益</span></label><input type="text" id="dca-rate" value="8" inputmode="decimal"></div>
+                <div class="field"><label>Initial Amount <span class="cn">/ 初始金额</span></label><input type="text" id="dca-init" value="10000" inputmode="decimal"></div>
+                <div class="field"><label>Monthly <span class="cn">/ 每月定投</span></label><input type="text" id="dca-monthly" value="1000" inputmode="decimal"></div>
+                <div class="field"><label>Annual Rate (%) <span class="cn">/ 年化收益</span></label><input type="text" id="dca-rate" value="6" inputmode="decimal"></div>
                 <div class="field"><label>Years <span class="cn">/ 投资年限</span></label><input type="text" id="dca-years" value="20" inputmode="numeric"></div>
                 <div class="field"><label>Annual Increase (%) <span class="cn">/ 年递增</span></label><input type="text" id="dca-stepup" value="0" inputmode="decimal"></div>
-                <div class="field"><label>Inflation (%) <span class="cn">/ 通胀率</span></label><input type="text" id="dca-inflation" value="0" inputmode="decimal"></div>
+                <div class="field"><label>Inflation (%) <span class="cn">/ 通胀率</span></label><input type="text" id="dca-inflation" value="3" inputmode="decimal"></div>
             </div>
             <div class="actions"><button class="btn btn-primary" onclick="calcDCA()">Calculate / 计算</button></div>
             <div class="results" id="dca-result">
@@ -130,8 +130,8 @@
     <div class="panel" id="p-loan">
         <div class="card">
             <div class="grid tri">
-                <div class="field"><label>Loan Amount <span class="cn">/ 贷款金额</span></label><input type="text" id="loan-amt" value="300000" inputmode="decimal"></div>
-                <div class="field"><label>Annual Rate (%) <span class="cn">/ 年利率</span></label><input type="text" id="loan-rate" value="4.5" inputmode="decimal"></div>
+                <div class="field"><label>Loan Amount <span class="cn">/ 贷款金额</span></label><input type="text" id="loan-amt" value="1000000" inputmode="decimal"></div>
+                <div class="field"><label>Annual Rate (%) <span class="cn">/ 年利率</span></label><input type="text" id="loan-rate" value="3.0" inputmode="decimal"></div>
                 <div class="field"><label>Term (Years) <span class="cn">/ 贷款年限</span></label><input type="text" id="loan-years" value="30" inputmode="numeric"></div>
             </div>
             <div class="actions"><button class="btn btn-primary" onclick="calcLoan()">Calculate / 计算</button></div>
@@ -156,7 +156,7 @@
                 <div class="field"><label>Retirement Age <span class="cn">/ 退休年龄</span></label><input type="text" id="ret-retage" value="60" inputmode="numeric"></div>
                 <div class="field"><label>Current Savings <span class="cn">/ 当前储蓄</span></label><input type="text" id="ret-savings" value="50000" inputmode="decimal"></div>
                 <div class="field"><label>Monthly Contribution <span class="cn">/ 每月投入</span></label><input type="text" id="ret-monthly" value="1000" inputmode="decimal"></div>
-                <div class="field"><label>Expected Return (%) <span class="cn">/ 预期收益</span></label><input type="text" id="ret-rate" value="7" inputmode="decimal"></div>
+                <div class="field"><label>Expected Return (%) <span class="cn">/ 预期收益</span></label><input type="text" id="ret-rate" value="6" inputmode="decimal"></div>
                 <div class="field"><label>Inflation (%) <span class="cn">/ 通胀率</span></label><input type="text" id="ret-inflation" value="3" inputmode="decimal"></div>
                 <div class="field"><label>Monthly Spending (Retire) <span class="cn">/ 退休月支出</span></label><input type="text" id="ret-spending" value="3000" inputmode="decimal"></div>
                 <div class="field"><label>Years in Retirement <span class="cn">/ 退休年数</span></label><input type="text" id="ret-yrs" value="30" inputmode="numeric"></div>
@@ -173,24 +173,7 @@
         </div>
     </div>
 
-    <!-- Rule of 72 -->
-    <div class="panel" id="p-r72">
-        <div class="card">
-            <div class="grid">
-                <div class="field"><label>Annual Return (%) <span class="cn">/ 年化收益率</span></label><input type="text" id="r72-rate" value="8" inputmode="decimal"></div>
-                <div class="field"></div>
-            </div>
-            <div class="actions"><button class="btn btn-primary" onclick="calcR72()">Calculate / 计算</button></div>
-            <div class="results" id="r72-result">
-                <div class="r72-result" id="r72-years"></div>
-                <div class="r72-label">years to double your money / 资金翻倍所需年数</div>
-                <div class="result-grid" style="margin-top:16px">
-                    <div class="result-card"><div class="result-label">Exact (log)<span class="cn">精确值</span></div><div class="result-value" id="r72-exact"></div></div>
-                    <div class="result-card"><div class="result-label">Doubling Factor<span class="cn">倍数</span></div><div class="result-value accent">2x</div></div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 <script>
@@ -224,12 +207,13 @@
 
     window.calcCI=function(){
         var P=num('ci-principal'),r=num('ci-rate')/100,y=num('ci-years'),n=parseInt($('ci-freq').value),rows=[];
-        for(var i=1;i<=y;i++){var A=P*Math.pow(1+r/n,n*i);rows.push({year:i,principal:P,interest:A-P,balance:A})}
+        var prevBal=P;
+        for(var i=1;i<=y;i++){var bal=P*Math.pow(1+r/n,n*i);var intY=bal-prevBal;rows.push({year:i,startBal:prevBal,interest:intY,endBal:bal});prevBal=bal}
         var fA=P*Math.pow(1+r/n,n*y),eff=(Math.pow(1+r/n,n)-1)*100;
         $('ci-final').textContent=fmt(fA);$('ci-interest').textContent=fmt(fA-P);$('ci-eff').textContent=eff.toFixed(2)+'%';
         var tb=$('ci-tbody');tb.innerHTML='';
-        rows.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td>'+r.year+'</td><td>'+fmt(r.principal)+'</td><td>'+fmt(r.interest)+'</td><td>'+fmt(r.balance)+'</td>';tb.appendChild(tr)});
-        drawChart('ci-chart',rows.map(function(r){return{principal:r.principal,interest:r.interest,label:'Y'+r.year}}),fA);
+        rows.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td>'+r.year+'</td><td>'+fmt(r.startBal)+'</td><td>'+fmt(r.interest)+'</td><td>'+fmt(r.endBal)+'</td>';tb.appendChild(tr)});
+        drawChart('ci-chart',rows.map(function(r){return{principal:r.startBal,interest:r.interest,label:'Y'+r.year}}),fA);
         $('ci-result').classList.add('show');
     };
 
@@ -263,10 +247,6 @@
         $('retire-result').classList.add('show');
     };
 
-    window.calcR72=function(){
-        var rate=num('r72-rate'),y72=72/rate,ye=Math.log(2)/Math.log(1+rate/100);
-        $('r72-years').textContent=y72.toFixed(1);$('r72-exact').textContent=ye.toFixed(2)+' yrs';$('r72-result').classList.add('show');
-    };
 
     document.querySelectorAll('input').forEach(function(i){i.addEventListener('keydown',function(e){if(e.key==='Enter'){var p=i.closest('.panel');if(p){var b=p.querySelector('.btn-primary');if(b)b.click()}e.preventDefault()}})});
 })();
