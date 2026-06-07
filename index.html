@@ -74,7 +74,7 @@
         <button class="tab active" data-tab="ci">Compound Interest<small>复利计算</small></button>
         <button class="tab" data-tab="dca">DCA / SIP<small>定投计算</small></button>
         <button class="tab" data-tab="loan">Loan<small>贷款计算</small></button>
-        <button class="tab" data-tab="retire">Retirement<small>退休规划</small></button>
+
 
     </div>
 
@@ -148,30 +148,7 @@
         </div>
     </div>
 
-    <!-- Retirement -->
-    <div class="panel" id="p-retire">
-        <div class="card">
-            <div class="grid">
-                <div class="field"><label>Current Age <span class="cn">/ 当前年龄</span></label><input type="text" id="ret-age" value="30" inputmode="numeric"></div>
-                <div class="field"><label>Retirement Age <span class="cn">/ 退休年龄</span></label><input type="text" id="ret-retage" value="60" inputmode="numeric"></div>
-                <div class="field"><label>Current Savings <span class="cn">/ 当前储蓄</span></label><input type="text" id="ret-savings" value="50000" inputmode="decimal"></div>
-                <div class="field"><label>Monthly Contribution <span class="cn">/ 每月投入</span></label><input type="text" id="ret-monthly" value="1000" inputmode="decimal"></div>
-                <div class="field"><label>Expected Return (%) <span class="cn">/ 预期收益</span></label><input type="text" id="ret-rate" value="6" inputmode="decimal"></div>
-                <div class="field"><label>Inflation (%) <span class="cn">/ 通胀率</span></label><input type="text" id="ret-inflation" value="3" inputmode="decimal"></div>
-                <div class="field"><label>Monthly Spending (Retire) <span class="cn">/ 退休月支出</span></label><input type="text" id="ret-spending" value="3000" inputmode="decimal"></div>
-                <div class="field"><label>Years in Retirement <span class="cn">/ 退休年数</span></label><input type="text" id="ret-yrs" value="30" inputmode="numeric"></div>
-            </div>
-            <div class="actions"><button class="btn btn-primary" onclick="calcRetire()">Calculate / 计算</button></div>
-            <div class="results" id="retire-result">
-                <div class="result-grid">
-                    <div class="result-card highlight"><div class="result-label">Retirement Fund<span class="cn">退休基金</span></div><div class="result-value accent" id="ret-fund"></div></div>
-                    <div class="result-card"><div class="result-label">Fund (Today's Value)<span class="cn">今日价值</span></div><div class="result-value" id="ret-real"></div></div>
-                    <div class="result-card"><div class="result-label">Required Fund<span class="cn">所需基金</span></div><div class="result-value" style="color:var(--orange)" id="ret-need"></div></div>
-                    <div class="result-card"><div class="result-label">Status<span class="cn">状态</span></div><div class="result-value" id="ret-status"></div></div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
 
 </div>
@@ -236,16 +213,6 @@
         drawChart('loan-chart',cd,tp);$('loan-result').classList.add('show');
     };
 
-    window.calcRetire=function(){
-        var age=num('ret-age'),ra=num('ret-retage'),sav=num('ret-savings'),mo=num('ret-monthly'),rate=num('ret-rate')/100,inf=num('ret-inflation')/100,sp=num('ret-spending'),ry=num('ret-yrs');
-        var yrs=ra-age,mr=rate/12,bal=sav;
-        for(var m=1;m<=yrs*12;m++)bal=bal*(1+mr)+mo;
-        var fund=bal,real=fund/Math.pow(1+inf,yrs),fsp=sp*Math.pow(1+inf,yrs),rm=rate/12,rmo=ry*12;
-        var req=rm===0?fsp*rmo:fsp*(1-Math.pow(1+rm,-rmo))/rm;
-        $('ret-fund').textContent=fmtK(fund);$('ret-real').textContent=fmtK(real);$('ret-need').textContent=fmtK(req);
-        var s=$('ret-status');if(fund>=req){s.textContent='On Track / 达标';s.style.color='var(--green)'}else{s.textContent='Gap: '+fmtK(req-fund)+' / 缺口';s.style.color='var(--red)'}
-        $('retire-result').classList.add('show');
-    };
 
 
     document.querySelectorAll('input').forEach(function(i){i.addEventListener('keydown',function(e){if(e.key==='Enter'){var p=i.closest('.panel');if(p){var b=p.querySelector('.btn-primary');if(b)b.click()}e.preventDefault()}})});
